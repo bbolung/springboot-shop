@@ -18,6 +18,8 @@ public class ThymeleafController {
     @GetMapping(value = "/ex01")
     public String ThymeleafExample01(Model model) {
         model.addAttribute("data", "타임리프 예제입니다.");
+        model.addAttribute("message", "<strong>굵은 글씨</strong>");
+
         return "thymeleafEx/thymeleafEx01";
     }
     
@@ -91,5 +93,16 @@ public class ThymeleafController {
         model.addAttribute("param2", p2);
 
         return "thymeleafEx/thymeleafEx06";
+    }
+    
+    //레이아웃
+    @GetMapping(value = "/ex07")
+    public String ThymeleafExample07() {
+        return "thymeleafEx/thymeleafEx07";
+    }
+
+    @GetMapping(value = "/ex07_1")
+    public String ThymeleafExample07_1() {
+        return "thymeleafEx/thymeleafEx07_1";
     }
 }

@@ -22,5 +22,17 @@
         상품가격 : <span th:text="${itemDto.price}"></span>
     </div>
 
+    <hr>
+
+    <form th:object="${itemDto}">
+        <div>
+            <label>상품이름</label>
+            <input type="text" th:field="*{itemNm}">
+        </div>
+        <div>
+            <label>상품가격</label>
+            <input type="text" th:field="*{price}">
+        </div>
+    </form>
 </body>
 </html>
