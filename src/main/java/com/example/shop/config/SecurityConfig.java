@@ -19,6 +19,34 @@ public class SecurityConfig {
 
         log.info("---------------Security Filter Chain---------------");
 
+        http
+                .authorizeHttpRequests(
+                                        config ->
+                                        config.requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                                                .requestMatchers("/", "/members/**", "/item/**").permitAll()
+                                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                                .anyRequest().authenticated()
+                );
+
+        http
+                .csrf(csrf -> csrf.disable())
+                .formLogin(
+                        form -> form.loginPage("/members/login")
+                                .defaultSuccessUrl("/")
+
+                                //login화면에서 name=username이면 생략O
+                                //username으로 email 사용하기에 반드시 기입
+                                .usernameParameter("email")
+                                .failureUrl("/members/login/error")
+                )
+                .logout(
+                        logout -> logout
+                                .logoutUrl("/members/logout")
+                                .logoutSuccessUrl("/")
+                                .invalidateHttpSession(true)    //세션 무효화 (선택 사항이지만 일반적으로 사용)
+                                .deleteCookies("JSESSIONID")  //쿠키 삭제 (선택 사항이지만 일반적으로 사용)
+                );
+
         return http.build();
     }
 

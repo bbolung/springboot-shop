@@ -34,7 +34,7 @@ public class Member {
     private Role role;
 
     //MemberFormDto -> member entity로 변환 (DB에 저장하기 위해서)
-    public static Member create(MemberFormDto memberFormDto,
+    public static Member createMember(MemberFormDto memberFormDto,
                                 PasswordEncoder passwordEncoder) {
         
 //        String password = passwordEncoder.encode(memberFormDto.getPassword());  -> 미리 암호화
