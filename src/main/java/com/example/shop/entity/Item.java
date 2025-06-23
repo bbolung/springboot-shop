@@ -17,6 +17,7 @@ public class Item {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "item_id")
     private Long id;            //상품코드
 
     @Column(nullable = false, length = 50)  //Not Null, 최대 50까지 입력 가능

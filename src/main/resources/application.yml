@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     database-platform: org.hibernate.dialect.MySQL8Dialect
 
     #실행되는 쿼리 console 출력(show_sql), 가독성 좋게 출력(format_sql)
