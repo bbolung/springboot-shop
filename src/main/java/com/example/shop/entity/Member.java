@@ -14,7 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Member {
+public class Member extends BaseEntity {
 
     @Id
     @Column(name = "member_id")
@@ -44,7 +44,7 @@ public class Member {
                 .email(memberFormDto.getEmail())
                 .password(passwordEncoder.encode(memberFormDto.getPassword()))      //미리 암호화하여 password를 넣어도 됨
                 .address(memberFormDto.getAddress())
-                .role(Role.USER)
+                .role(Role.ADMIN)
                 .build();
     }
 }

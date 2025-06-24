@@ -4,6 +4,7 @@ import com.example.shop.constant.ItemSellStatus;
 import com.example.shop.dto.MemberFormDto;
 import com.example.shop.repository.ItemRepository;
 import com.example.shop.repository.MemberRepository;
+import com.example.shop.repository.OrderItemRepository;
 import com.example.shop.repository.OrderRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Slf4j
-//@Transactional
+@Transactional
 class OrderTest {
 
     @Autowired
@@ -38,6 +39,10 @@ class OrderTest {
 
     static int i=1;
 
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    //주문 생성
     public Order createOrder() {
         Order order = new Order();
 
@@ -63,6 +68,40 @@ class OrderTest {
         return order;
     }
 
+    @Test
+    @DisplayName("고아객체 제거 테스트")
+    public void orphanRemovalTest(){
+        Order order = createOrder();
+        order.getOrderItems().remove(0);    //0번째 데이터 지움
+
+        em.flush();
+
+    }
+
+    @Test
+    @DisplayName("지연 로딩 테스트")
+    public void lazyLoadingTest(){
+        Order order = createOrder();    //주문 생성 메소드 사용하여 주문 데이터 저장
+
+        Long OrderItemId = order.getOrderItems().get(0).getId();
+
+        log.info("OrderItemId ==> {}", OrderItemId);
+
+        em.flush();
+        em.clear();     //영속성 컨텍스트의 상태 초기화
+
+        OrderItem orderItem = orderItemRepository.findById(OrderItemId)
+                .orElseThrow(() -> new EntityNotFoundException("id값 없음"));
+
+        //orderItem 조회
+        log.info("orderItem ==> {}", orderItem);
+
+        //orderItem 엔티티 안에 있는 order 객체의 클래스 출력 = order 클래스 출력
+        log.info("order class ==> {}", orderItem.getOrder().getClass());
+
+    }
+
+    //상품 생성
     public Item createItem() {
         Item item = new Item();
 
@@ -104,15 +143,5 @@ class OrderTest {
                 .orElseThrow(()-> new EntityNotFoundException("ID 없음"));
 
         assertEquals(3, savedOrder.getOrderItems().size());
-    }
-
-    @Test
-    @DisplayName("고아객체 제거 테스트")
-    public void orphanRemovalTest(){
-        Order order = createOrder();
-        order.getOrderItems().remove(0);    //0번째 데이터 지움
-
-        em.flush();
-
     }
 }

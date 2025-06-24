@@ -14,27 +14,25 @@ import java.util.List;
 @Table(name = "orders")
 @Getter
 @Setter
-@ToString
-public class Order {
+//@ToStirng
+public class Order extends BaseEntity {
 
     @Id
     @GeneratedValue
     @Column(name = "order_id")
     private Long id;
 
-    @ManyToOne  //회원이 여러 개 주문 가능
+    //회원이 여러 개 주문 가능
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    // @ToString.Exclude
     private List<OrderItem> orderItems = new ArrayList<>();  //여러 개 전달받을 수 O
 
     private LocalDateTime orderDate;    //주문일
 
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;    //주문상태
-
-    private LocalDateTime regTime;      //최초 주문시간
-
-    private LocalDateTime updateTime;   //수정 주문시간
 }

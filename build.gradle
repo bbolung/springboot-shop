@@ -50,6 +50,9 @@ dependencies {
 
     //유효성 체크
     implementation("org.springframework.boot:spring-boot-starter-validation:3.5.0")
+
+    // DTO <===> Entity 변환
+    implementation("org.modelmapper:modelmapper:3.2.4")
 }
 
 tasks.named('test') {
