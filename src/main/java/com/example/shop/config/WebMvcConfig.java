@@ -22,6 +22,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 //실제 파일이 저장된 위치(uploadPath)에 있는 파일을 제공하도록 매핑 설정
 
                 .addResourceLocations(uploadPath);
-                //
+                // 실제 파일이 저장된 물리적 경로 또는 URL 경로
+                // 예: "file:///C:/upload/" 또는 "classpath:/static/images/"
     }
 }

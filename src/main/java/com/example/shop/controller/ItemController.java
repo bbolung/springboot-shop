@@ -1,17 +1,29 @@
 package com.example.shop.controller;
 
 import com.example.shop.dto.ItemFormDto;
+import com.example.shop.service.ItemService;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 @Slf4j
 public class ItemController {
+
+    private final ItemService itemService;
 
     @GetMapping("/admin/item/new")
     public String itemForm(Model model) {
@@ -19,5 +31,49 @@ public class ItemController {
         model.addAttribute("itemFormDto", new ItemFormDto());
 
         return "/item/itemForm";
+    }
+
+    @PostMapping("/admin/item/new")
+    public String itemNew(@Valid ItemFormDto itemFormDto,
+                          BindingResult bindingResult,
+                          @RequestParam("itemImgFile") List<MultipartFile> itemImgFileList,
+                          Model model) {
+
+        if(bindingResult.hasErrors()){
+            return "/item/itemForm";
+        }
+        
+        log.info("itemFormDto ====> {}", itemFormDto);  //Talend API Tester에서 테스트할 때 진입 확인용
+        
+        //대표 이미지 존재X + 이미지가 존재X
+        if(itemImgFileList.get(0).isEmpty() && itemFormDto.getId() == null){
+           model.addAttribute("errorMessage", "첫번째 상품 이미지는 필수 입력 값입니다.");
+
+           return "/item/itemForm";
+        }
+
+        try{
+            itemService.saveItem(itemFormDto, itemImgFileList);
+        }catch (Exception e){
+            model.addAttribute("errorMessage", "상품 등록 중 에러가 발생하였습니다.");
+            return "/item/itemForm";
+        }
+
+        return "redirect:/";
+    }
+
+    //상품 수정 요청
+    @GetMapping(value = "/admin/item/{itemid}")
+    public String itemDtl(@PathVariable Long itemid, Model model) {
+
+        try{
+            ItemFormDto itemFormDto = itemService.getItemDtl(itemid);
+            model.addAttribute("itemFormDto", itemFormDto);
+        }catch (EntityNotFoundException e){
+            model.addAttribute("errorMessage", "존재하지 않는 상품입니다.");
+            model.addAttribute("itemFormDto", new ItemFormDto());
+        }
+
+        return "item/itemForm";
     }
 }
