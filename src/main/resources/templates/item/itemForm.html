@@ -122,7 +122,7 @@
       <div class="form-group" th:each="itemImgDto, status: ${itemFormDto.itemImgDtoList}">
         <div class="custom-file img-div">
           <input type="file" class="custom-file-input" name="itemImgFile">
-          <input type="hidden" name="itemImgIds" th:value="${itemImgDto.id}">
+          <input type="hidden" name="itemImgId" th:value="${itemImgDto.id}">
           <label class="custom-file-label" th:text="${not #strings.isEmpty(itemImgDto.oriImgName)} ? ${itemImgDto.oriImgName} : '상품이미지' + ${status.index+1}"></label>
         </div>
       </div>

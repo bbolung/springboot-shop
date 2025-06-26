@@ -45,7 +45,7 @@ public class ItemController {
         
         log.info("itemFormDto ====> {}", itemFormDto);  //Talend API Tester에서 테스트할 때 진입 확인용
         
-        //대표 이미지 존재X + 이미지가 존재X
+        //대표 이미지 존재X = 이미지가 존재X
         if(itemImgFileList.get(0).isEmpty() && itemFormDto.getId() == null){
            model.addAttribute("errorMessage", "첫번째 상품 이미지는 필수 입력 값입니다.");
 
@@ -62,7 +62,7 @@ public class ItemController {
         return "redirect:/";
     }
 
-    //상품 수정 요청
+    //상품 수정 페이지 요청
     @GetMapping(value = "/admin/item/{itemid}")
     public String itemDtl(@PathVariable Long itemid, Model model) {
 
@@ -76,4 +76,30 @@ public class ItemController {
 
         return "item/itemForm";
     }
+
+    //상품 수정 저장 요청
+    @PostMapping(value = "/admin/item/{itemid}")
+    public String itemUpdate(@Valid ItemFormDto itemFormDto, BindingResult bindingResult,
+                             @RequestParam("itemImgFile") List<MultipartFile> itemImgFileList,
+                             Model model) {
+
+        if(bindingResult.hasErrors()){
+            return "/item/itemForm";
+        }
+
+        if(itemImgFileList.get(0).isEmpty() && itemFormDto.getId() == null){
+            model.addAttribute("errorMessage", "첫번째 상품 이미지는 필수 입력 값입니다.");
+            return "/item/itemForm";
+        }
+
+        try{
+            itemService.updateItem(itemFormDto, itemImgFileList);
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "상품 수정 중 에러가 발생하였습니다.");
+            return "/item/itemForm";
+        }
+
+        return "redirect:/";
+    }
+
 }

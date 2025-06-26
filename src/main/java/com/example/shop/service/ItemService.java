@@ -50,7 +50,7 @@ public class ItemService {
         return item.getId();
     }
 
-    //상품 수정
+    //상품 수정 페이지 (기존 데이터 조회)
     @Transactional(readOnly = true)     //JPA가 dirtyChecking(변경감지) 수행하지X
     public ItemFormDto getItemDtl(Long itemId){
         //상품 이미지 조회 -> ItemFormDto에 저장
@@ -76,4 +76,27 @@ public class ItemService {
 
         return itemFormDto;
     }
+
+    //상품 수정 등록
+    public Long updateItem(ItemFormDto itemFormDto, List<MultipartFile> itemImgFileList) throws Exception {
+
+        //상품 정보 조회
+        Item item = itemRepository.findById(itemFormDto.getId())
+                .orElseThrow(() -> new EntityNotFoundException());
+
+        //상품 정보 수정
+        item.updateItem(itemFormDto);
+
+        //상품 이미지 수정
+        List<Long> itemImfIds = itemFormDto.getItemImgId();
+
+        log.info("=======> : {}", itemImfIds);
+
+        for(int i=0; i<itemImfIds.size(); i++){
+            itemImgService.updateItemImg(itemImfIds.get(i), itemImgFileList.get(i));
+        }
+
+        return item.getId();
+    }
+
 }
