@@ -1,12 +1,17 @@
 package com.example.shop.repository;
 
 import com.example.shop.constant.ItemSellStatus;
+import com.example.shop.dto.ItemSearchDto;
 import com.example.shop.entity.Item;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import static  org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -101,4 +106,31 @@ class ItemRepositoryTest {
         List<Item> itemList = itemRepository.findByItemDetailByNative("설명1");
         itemList.forEach(item -> log.info("item: {}", item.toString()));
     }
+
+    @Autowired
+    private EntityManager em;
+
+    @Test
+    public void getGetAdminItemPage(){
+
+        //Given : 테스트를 위한 초기 상태 설정
+        ItemSearchDto searchDto = new ItemSearchDto();
+        searchDto.setSearchDateType("all");
+        searchDto.setItemSellStatus(ItemSellStatus.SOLD_OUT);
+        searchDto.setSearchBy("itemNm");
+        searchDto.setSearchQuery("자바");
+
+        PageRequest pageRequest = PageRequest.of(0, 5);//0페이지 5개 조회
+
+        //When : 테스트할 동작 실행
+        Page<Item> result = itemRepository.getAdminItemPage(searchDto, pageRequest);
+
+        //Then : 실행 결과 검증
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        assertThat(result.getContent().size()).isEqualTo(2);
+        assertThat(result.getContent().get(0).getItemNm()).contains("자바");
+
+        result.getContent().forEach(item -> log.info("item ==> {}", item.toString()));
+    }
+
 }

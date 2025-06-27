@@ -1,6 +1,9 @@
 package com.example.shop.repository;
 
+import com.example.shop.dto.ItemSearchDto;
 import com.example.shop.entity.Item;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -10,7 +13,7 @@ import java.util.List;
 
                                                     //클래스이름, 기본키 타입
 public interface ItemRepository extends JpaRepository<Item, Long>,
-                                        QuerydslPredicateExecutor<Item> {
+                                        QuerydslPredicateExecutor<Item>, ItemRepositoryCustom {
 
     List<Item> findByItemNm(String itemNm);         //itemNm 일치하는 경우만 조회
 
@@ -26,4 +29,5 @@ public interface ItemRepository extends JpaRepository<Item, Long>,
     @Query(value = "select * from item where item_detail " +
             "like %:itemDetail% order by price desc", nativeQuery = true)
     List<Item> findByItemDetailByNative(@Param("itemDetail") String itemDetail);
+
 }
