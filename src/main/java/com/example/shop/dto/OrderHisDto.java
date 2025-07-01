@@ -25,9 +25,9 @@ public class OrderHisDto {
     }
 
     //주문 리스트에 orderItemDto 객체 추가
-    private List<OrderItemDto> orderItemList = new ArrayList<>();
+    private List<OrderItemDto> orderItemDtoList = new ArrayList<>();
     
     public void addOrderItemDto(OrderItemDto orderItemDto) {
-        this.orderItemList.add(orderItemDto);
+        this.orderItemDtoList.add(orderItemDto);
     }
 }

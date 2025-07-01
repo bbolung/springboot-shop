@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,5 +97,29 @@ public class OrderService {
 
         }
         return new PageImpl<>(orderHisDtoList, pageable, totalCount);
+    }
+
+    //orderId(주문번호) DB 존재 확인, email(로그인 사용자) vs order의 email 동일 확인(동일 사용자)
+    public boolean validateOrder(Long orderId, String email) {
+
+        Member curmember = memberRepository.findByEmail(email);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException());
+
+        Member savedMember = order.getMember();
+
+        if(!StringUtils.equals(curmember.getEmail(), savedMember.getEmail())){
+            return false;
+        }
+
+        return true;
+    }
+
+    //주문 취소
+    public void cancelOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException());
+        order.cancelOrder();
     }
 }
