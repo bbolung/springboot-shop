@@ -60,7 +60,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public Page<OrderHisDto> getOrderList(String email, Pageable pageable) {
         
-        //email로 주문 상품, 주문 개수 가져옴
+        //email로 전체 주문서, 주문서 개수 가져옴
         List<Order> orders = orderRepository.findOrders(email, pageable);
         Long totalCount = orderRepository.countOrders(email);
 

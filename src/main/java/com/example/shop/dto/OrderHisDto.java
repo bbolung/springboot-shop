@@ -24,9 +24,10 @@ public class OrderHisDto {
         this.orderStatus = order.getOrderStatus();
     }
 
-    //주문 리스트에 orderItemDto 객체 추가
+    //주문 상품 리스트(orderItemDtoList) 객체
     private List<OrderItemDto> orderItemDtoList = new ArrayList<>();
-    
+
+    //주문 상품을 주문 상품 리스트 객체에 추가
     public void addOrderItemDto(OrderItemDto orderItemDto) {
         this.orderItemDtoList.add(orderItemDto);
     }

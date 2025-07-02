@@ -44,7 +44,7 @@ public class Member extends BaseEntity {
                 .email(memberFormDto.getEmail())
                 .password(passwordEncoder.encode(memberFormDto.getPassword()))      //미리 암호화하여 password를 넣어도 됨
                 .address(memberFormDto.getAddress())
-                .role(Role.USER)
+                .role(Role.ADMIN)
                 .build();
     }
 }

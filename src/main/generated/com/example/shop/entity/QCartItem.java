@@ -26,12 +26,12 @@ public class QCartItem extends EntityPathBase<CartItem> {
 
     public final QCart cart;
 
-    public final NumberPath<Long> cartItemId = createNumber("cartItemId", Long.class);
-
     public final NumberPath<Integer> count = createNumber("count", Integer.class);
 
     //inherited
     public final StringPath createdBy = _super.createdBy;
+
+    public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final QItem item;
 
