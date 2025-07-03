@@ -2,6 +2,8 @@ package com.example.shop.service;
 
 import com.example.shop.dto.CartDetailDto;
 import com.example.shop.dto.CartItemDto;
+import com.example.shop.dto.CartOrderDto;
+import com.example.shop.dto.OrderDto;
 import com.example.shop.entity.Cart;
 import com.example.shop.entity.CartItem;
 import com.example.shop.entity.Item;
@@ -12,8 +14,10 @@ import com.example.shop.repository.ItemRepository;
 import com.example.shop.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +25,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class CartService {
 
     private final ItemRepository itemRepository;
     private final MemberRepository memberRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+    private final OrderService orderService;
 
     //상품 장바구니에 추가
     public Long addCart(CartItemDto cartItemDto, String email) {
@@ -77,5 +83,72 @@ public class CartService {
         cartDetailDtoList = cartItemRepository.findCartDetailDtoList(cart.getId());
 
         return cartDetailDtoList;
+    }
+
+    //장바구니 페이지의 사용자 vs 로그인한 사용자 동일?
+    @Transactional(readOnly = true)
+    public boolean  validateCartItem(Long cartItemId, String email) {
+        Member member = memberRepository.findByEmail(email);
+
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new EntityNotFoundException());
+
+        Member savedMember = cartItem.getCart().getMember();
+
+        if(!StringUtils.equals(savedMember.getEmail(), member.getEmail())){
+            return false;
+        }
+
+        return true;
+    }
+
+    //장바구니 수량 변경
+    public void updateCartItem(Long cartItemId, int count) {
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new EntityNotFoundException());
+
+        //cartItem의 스냅샷과 비교하여 값의 변경 감지(dirty checking) -> update구문 실행
+        cartItem.setCount(count);
+
+    }
+
+    //장바구니 상품 삭제
+    public void deleteCartItem(Long cartItemId) {
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new EntityNotFoundException());
+
+        cartItemRepository.delete(cartItem);
+    }
+
+    //장바구니 주문 상품 -> 주문 정보 List에 담아서 -> 주문 orders() 호출
+    public Long OrderCartItem(List<CartOrderDto> cartOrderDtoList, String email) {
+
+        List<OrderDto> orderDtoList = new ArrayList<>();
+
+        for (CartOrderDto cartOrderDto : cartOrderDtoList) {
+            log.info("carOrderDto : {}", cartOrderDto);
+
+            CartItem cartItem = cartItemRepository.findById(cartOrderDto.getCartItemId())
+                    .orElseThrow(() -> new EntityNotFoundException());
+
+            OrderDto orderDto = new OrderDto();
+
+            orderDto.setItemId(cartItem.getItem().getId());
+            orderDto.setCount(cartItem.getCount());
+
+            orderDtoList.add(orderDto);
+        }
+
+        Long orderId = orderService.orders(orderDtoList, email);
+
+        //주문 완료되었으니까 장바구니 목록 비우기
+        for(CartOrderDto cartOrderDto : cartOrderDtoList){
+            CartItem cartItem = cartItemRepository.findById(cartOrderDto.getCartItemId())
+                    .orElseThrow(() -> new EntityNotFoundException());
+
+            cartItemRepository.delete(cartItem);
+        }
+
+        return orderId;
     }
 }

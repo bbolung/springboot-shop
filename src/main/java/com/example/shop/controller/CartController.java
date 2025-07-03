@@ -2,6 +2,7 @@ package com.example.shop.controller;
 
 import com.example.shop.dto.CartDetailDto;
 import com.example.shop.dto.CartItemDto;
+import com.example.shop.dto.CartOrderDto;
 import com.example.shop.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,10 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -63,5 +61,66 @@ public class CartController {
         model.addAttribute("cartItems", cartDetailList);
 
         return "cart/cartList";
+    }
+
+    //장바구니 수량 변경
+    // PATCH, var url = "/cartItem/" + cartItemId+ "?count=" + count;
+    @PatchMapping(value = "/cartItem/{cartItemId}")
+    public @ResponseBody ResponseEntity<?> updateCartItem(@PathVariable("cartItemId") Long cartItemId,
+                                                          @RequestParam("count") int count,
+                                                          Principal principal) {
+
+        //예외 처리 먼저
+        if(count <= 0) {
+            return new ResponseEntity<String>("최소 1개 이상 담아주세요.", HttpStatus.BAD_REQUEST);
+        }else if(!cartService.validateCartItem(cartItemId, principal.getName())) {
+            return new ResponseEntity<String>("수정 권한이 없습니다.", HttpStatus.FORBIDDEN);
+        }
+
+        cartService.updateCartItem(cartItemId, count);
+
+        return new ResponseEntity<Long>(cartItemId, HttpStatus.OK);
+    }
+
+    //장바구니 상품 삭제
+    //var url = "/cartItem/" + cartItemId;
+    @DeleteMapping(value = "/cartItem/{cartItemId}")
+    public @ResponseBody ResponseEntity<?> deleteCartItem(@PathVariable("cartItemId") Long cartItemId,
+                                                          Principal principal) {
+
+        if (!cartService.validateCartItem(cartItemId, principal.getName())) {
+            return new ResponseEntity<String>("수정 권한이 없습니다.", HttpStatus.FORBIDDEN);
+        }
+
+        cartService.deleteCartItem(cartItemId);
+
+        return new ResponseEntity<Long>(cartItemId, HttpStatus.OK);
+    }
+
+    //장바구니에서 주문 요청
+    //var url = "/cart/orders";
+    //paramData['cartOrderDtoList'] = dataList;
+    @PostMapping(value = "/cart/orders")
+    public @ResponseBody ResponseEntity<?> orders(@RequestBody CartOrderDto CartOrderDto,
+                                                  Principal principal) {
+
+        //CartOrderDto : cartItemId=152, cartOrderDtoList=null)
+        //log.info("CartOrderDto >> {}", CartOrderDto);
+
+        List<CartOrderDto> cartOrderDtoList = CartOrderDto.getCartOrderDtoList();
+
+        if(cartOrderDtoList == null || cartOrderDtoList.size() == 0) {
+            return new ResponseEntity<String>("주문 상품을 선택해 주세요.", HttpStatus.BAD_REQUEST);
+        }
+
+        for(CartOrderDto cartOrderDto : cartOrderDtoList) {
+            if(!cartService.validateCartItem(cartOrderDto.getCartItemId(), principal.getName())) {
+                return new ResponseEntity<String>("수정 권한이 없습니다.", HttpStatus.FORBIDDEN);
+            }
+        }
+
+        Long orderId = cartService.OrderCartItem(cartOrderDtoList, principal.getName());
+
+        return new ResponseEntity<Long>(orderId, HttpStatus.CREATED);
     }
 }

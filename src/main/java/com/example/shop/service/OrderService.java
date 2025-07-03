@@ -29,6 +29,7 @@ public class OrderService {
     private final MemberRepository memberRepository;
     private final ItemImgRepository itemImgRepository;
 
+    //상품 상세 페이지에서 주문
     //orderDto (맥주, 2병), email(1번 테이블)
     public Long order(OrderDto orderDto, String eamil) {
 
@@ -121,5 +122,28 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException());
         order.cancelOrder();
+    }
+
+    //장바구니 상품 주문
+    public Long orders(List<OrderDto> orderDtoList, String email) {
+
+        Member member = memberRepository.findByEmail(email);
+
+        List<OrderItem> orderItemList = new ArrayList<>();
+
+        for(OrderDto orderDto : orderDtoList){
+            Item item = itemRepository.findById(orderDto.getItemId())
+                    .orElseThrow(() -> new EntityNotFoundException());
+
+            OrderItem orderItem = OrderItem.createOrderItem(item, orderDto.getCount());
+
+            orderItemList.add(orderItem);
+        }
+
+        Order order = Order.createOrder(member, orderItemList);
+
+        orderRepository.save(order);
+
+        return order.getId();
     }
 }
