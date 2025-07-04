@@ -13,7 +13,7 @@ public class CartDetailDto {
     private int count;          //수량
     private String imgUrl;      //상품 이미지 경로
 
-    //
+    //JPQL 실행 결과 DTO로 받기 위한 생성자
     public CartDetailDto(Long cartItemId, String itemNm, int price, int count, String imgUrl) {
         this.cartItemId = cartItemId;
         this.itemNm = itemNm;

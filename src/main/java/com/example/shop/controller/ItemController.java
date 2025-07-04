@@ -108,6 +108,7 @@ public class ItemController {
         return "redirect:/";
     }
 
+    //상품 관리 페이지
     @GetMapping(value = {"/admin/items", "/admin/items/{page}"})
     public String itemManage(ItemSearchDto itemSearchDto,
                              @PathVariable("page")Optional<Integer> page, Model model){
